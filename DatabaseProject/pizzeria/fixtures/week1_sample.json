@@ -1,0 +1,363 @@
+[
+  {
+    "model": "pizzeria.ingredient",
+    "pk": 1,
+    "fields": {
+      "name": "San Marzano Tomato Sauce",
+      "is_meat": false,
+      "is_dairy": false,
+      "is_vegan": true,
+      "unit_cost": "0.02",
+      "unit_type": "gram",
+      "created_at": "2025-09-18T12:00:00Z",
+      "updated_at": "2025-09-18T12:00:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.ingredient",
+    "pk": 2,
+    "fields": {
+      "name": "Fresh Mozzarella",
+      "is_meat": false,
+      "is_dairy": true,
+      "is_vegan": false,
+      "unit_cost": "0.03",
+      "unit_type": "gram",
+      "created_at": "2025-09-18T12:00:00Z",
+      "updated_at": "2025-09-18T12:00:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.ingredient",
+    "pk": 3,
+    "fields": {
+      "name": "Neapolitan Dough",
+      "is_meat": false,
+      "is_dairy": false,
+      "is_vegan": true,
+      "unit_cost": "0.90",
+      "unit_type": "piece",
+      "created_at": "2025-09-18T12:00:00Z",
+      "updated_at": "2025-09-18T12:00:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.ingredient",
+    "pk": 4,
+    "fields": {
+      "name": "Pepperoni",
+      "is_meat": true,
+      "is_dairy": false,
+      "is_vegan": false,
+      "unit_cost": "0.05",
+      "unit_type": "gram",
+      "created_at": "2025-09-18T12:00:00Z",
+      "updated_at": "2025-09-18T12:00:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.ingredient",
+    "pk": 5,
+    "fields": {
+      "name": "Fresh Basil",
+      "is_meat": false,
+      "is_dairy": false,
+      "is_vegan": true,
+      "unit_cost": "0.01",
+      "unit_type": "gram",
+      "created_at": "2025-09-18T12:00:00Z",
+      "updated_at": "2025-09-18T12:00:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizza",
+    "pk": 1,
+    "fields": {
+      "name": "Margherita",
+      "description": "Tomato sauce, fresh mozzarella, and basil.",
+      "is_active": true,
+      "is_vegetarian": true,
+      "is_vegan": false,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizza",
+    "pk": 2,
+    "fields": {
+      "name": "Pepperoni",
+      "description": "Classic pepperoni pizza with mozzarella.",
+      "is_active": true,
+      "is_vegetarian": false,
+      "is_vegan": false,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.customer",
+    "pk": 1,
+    "fields": {
+      "first_name": "Luca",
+      "last_name": "Bianchi",
+      "birthdate": "1990-05-12",
+      "email": "luca.bianchi@example.com",
+      "phone": "+32-470-100100",
+      "street": "Via Roma 12",
+      "city": "Brussels",
+      "postal_code": "1000",
+      "country": "Belgium",
+      "gender": "male",
+      "created_at": "2025-09-18T12:10:00Z",
+      "updated_at": "2025-09-18T12:10:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.customer",
+    "pk": 2,
+    "fields": {
+      "first_name": "Emma",
+      "last_name": "Verhoeven",
+      "birthdate": "1995-11-03",
+      "email": "emma.verhoeven@example.com",
+      "phone": "+32-470-200200",
+      "street": "Rue de la Loi 45",
+      "city": "Brussels",
+      "postal_code": "1040",
+      "country": "Belgium",
+      "gender": "female",
+      "created_at": "2025-09-18T12:10:00Z",
+      "updated_at": "2025-09-18T12:10:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.deliveryperson",
+    "pk": 1,
+    "fields": {
+      "first_name": "Anna",
+      "last_name": "Keller",
+      "phone": "+32-470-300300",
+      "postal_code": "1000",
+      "last_delivery_completed_at": null,
+      "is_active": true,
+      "created_at": "2025-09-18T12:15:00Z",
+      "updated_at": "2025-09-18T12:15:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.deliveryperson",
+    "pk": 2,
+    "fields": {
+      "first_name": "Marek",
+      "last_name": "Nowak",
+      "phone": "+32-470-400400",
+      "postal_code": "1040",
+      "last_delivery_completed_at": null,
+      "is_active": true,
+      "created_at": "2025-09-18T12:15:00Z",
+      "updated_at": "2025-09-18T12:15:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.discountcode",
+    "pk": 1,
+    "fields": {
+      "code": "WELCOME10",
+      "description": "10% off the first order",
+      "discount_type": "percentage",
+      "discount_value": "10.00",
+      "valid_from": "2025-01-01",
+      "valid_until": "2025-12-31",
+      "is_one_time": true,
+      "usage_limit": 1,
+      "used_count": 0,
+      "is_active": true,
+      "created_at": "2025-09-18T12:20:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.discountcode",
+    "pk": 2,
+    "fields": {
+      "code": "FREEDRINK",
+      "description": "Free drink with any pizza",
+      "discount_type": "fixed_amount",
+      "discount_value": "3.00",
+      "valid_from": "2025-01-01",
+      "valid_until": null,
+      "is_one_time": false,
+      "usage_limit": 100,
+      "used_count": 10,
+      "is_active": true,
+      "created_at": "2025-09-18T12:20:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.customerorder",
+    "pk": 1,
+    "fields": {
+      "customer": 1,
+      "order_datetime": "2025-09-18T18:30:00Z",
+      "status": "delivered",
+      "delivery_type": "delivery",
+      "total_discount": "5.00",
+      "notes": "Leave at the reception",
+      "delivery_person": 1,
+      "driver_assigned_at": "2025-09-18T18:35:00Z",
+      "delivered_at": "2025-09-18T19:05:00Z",
+      "created_at": "2025-09-18T18:30:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.customerorder",
+    "pk": 2,
+    "fields": {
+      "customer": 2,
+      "order_datetime": "2025-09-19T11:15:00Z",
+      "status": "pending",
+      "delivery_type": "pickup",
+      "total_discount": "0.00",
+      "notes": "Add extra napkins",
+      "delivery_person": null,
+      "driver_assigned_at": null,
+      "delivered_at": null,
+      "created_at": "2025-09-19T11:15:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.orderitem",
+    "pk": 1,
+    "fields": {
+      "order": 1,
+      "item_type": "pizza",
+      "pizza": 1,
+      "item_name_snapshot": "Margherita",
+      "quantity": 2,
+      "unit_price_at_order": "11.75",
+      "created_at": "2025-09-18T18:30:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.orderitem",
+    "pk": 2,
+    "fields": {
+      "order": 1,
+      "item_type": "pizza",
+      "pizza": 2,
+      "item_name_snapshot": "Pepperoni",
+      "quantity": 1,
+      "unit_price_at_order": "12.50",
+      "created_at": "2025-09-18T18:32:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.orderitem",
+    "pk": 3,
+    "fields": {
+      "order": 2,
+      "item_type": "pizza",
+      "pizza": 2,
+      "item_name_snapshot": "Pepperoni",
+      "quantity": 1,
+      "unit_price_at_order": "12.50",
+      "created_at": "2025-09-19T11:15:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 1,
+    "fields": {
+      "pizza": 1,
+      "ingredient": 3,
+      "quantity": "1.00",
+      "position": 1,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 2,
+    "fields": {
+      "pizza": 1,
+      "ingredient": 1,
+      "quantity": "120.00",
+      "position": 2,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 3,
+    "fields": {
+      "pizza": 1,
+      "ingredient": 2,
+      "quantity": "100.00",
+      "position": 3,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 4,
+    "fields": {
+      "pizza": 1,
+      "ingredient": 5,
+      "quantity": "5.00",
+      "position": 4,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 5,
+    "fields": {
+      "pizza": 2,
+      "ingredient": 3,
+      "quantity": "1.00",
+      "position": 1,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 6,
+    "fields": {
+      "pizza": 2,
+      "ingredient": 1,
+      "quantity": "120.00",
+      "position": 2,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 7,
+    "fields": {
+      "pizza": 2,
+      "ingredient": 2,
+      "quantity": "100.00",
+      "position": 3,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  },
+  {
+    "model": "pizzeria.pizzaingredient",
+    "pk": 8,
+    "fields": {
+      "pizza": 2,
+      "ingredient": 4,
+      "quantity": "80.00",
+      "position": 4,
+      "created_at": "2025-09-18T12:05:00Z",
+      "updated_at": "2025-09-18T12:05:00Z"
+    }
+  }
+]
