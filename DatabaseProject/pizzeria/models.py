@@ -91,7 +91,7 @@ class PizzaIngredient(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.pizza} → {self.ingredient} ({self.quantity})"
+        return f"{self.pizza} -> {self.ingredient} ({self.quantity})"
 
 
 class Customer(models.Model):
@@ -264,4 +264,50 @@ class PizzaPricing(models.Model):
         verbose_name_plural = "Pizza pricing"
 
     def __str__(self) -> str:
-        return f"{self.pizza.name} → €{self.final_price_with_vat}"
+        return f"{self.pizza.name} -> EUR {self.final_price_with_vat}"
+
+
+
+class Drink(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    category = models.CharField(max_length=50)
+    price_eur = models.DecimalField(max_digits=6, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Dessert(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    price_eur = models.DecimalField(max_digits=6, decimal_places=2)
+    is_vegan = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class DessertIngredient(models.Model):
+    dessert = models.ForeignKey(Dessert, on_delete=models.CASCADE, related_name="dessert_ingredients")
+    ingredient = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("dessert", "ingredient")
+        ordering = ["dessert", "ingredient"]
+
+    def __str__(self) -> str:
+        return f"{self.dessert.name}: {self.ingredient}"

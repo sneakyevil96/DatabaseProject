@@ -1,0 +1,29 @@
+ingredient_id,ingredient_name,category,is_vegan,is_vegetarian,unit_cost_eur,unit_measure
+1001,Tomato sauce,sauce,1,1,0.03,gram
+1002,Mozzarella,cheese,0,1,0.05,gram
+1003,Pepperoni,meat,0,0,0.07,gram
+1004,Chicken kebab,meat,0,0,0.08,gram
+1005,Onions,veg,1,1,0.02,gram
+1006,Garlic sauce,sauce,0,1,0.06,gram
+1007,Gyros meat,meat,0,0,0.08,gram
+1008,Tomatoes,veg,1,1,0.03,gram
+1009,Tzatziki,sauce,0,1,0.05,gram
+1010,Gorgonzola,cheese,0,1,0.06,gram
+1011,Parmesan,cheese,0,1,0.07,gram
+1012,Ricotta,cheese,0,1,0.05,gram
+1013,Salami,meat,0,0,0.07,gram
+1014,Bacon,meat,0,0,0.08,gram
+1015,Italian sausage,meat,0,0,0.07,gram
+1016,Ground beef,meat,0,0,0.06,gram
+1017,Tuna,seafood,0,0,0.07,gram
+1018,Sweetcorn,veg,1,1,0.025,gram
+1019,Artichoke hearts,veg,1,1,0.035,gram
+1020,BBQ sauce,sauce,1,1,0.04,gram
+1021,Chicken,meat,0,0,0.07,gram
+1022,Green peppers,veg,1,1,0.02,gram
+1023,Mushrooms,veg,1,1,0.03,gram
+1024,Black olives,veg,1,1,0.03,gram
+1025,Curry sauce (sweet),sauce,0,1,0.05,gram
+1026,Pineapple,veg,1,1,0.03,gram
+1027,Fresh basil,veg,1,1,0.04,gram
+1028,Neapolitan dough,dough,1,1,0.50,portion

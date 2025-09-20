@@ -1,0 +1,24 @@
+drink_id,drink_name,category,price_eur
+6001,Coca-Cola (33cl),Soft Drink,2.50
+6002,Coca-Cola Zero (33cl),Soft Drink,2.50
+6003,Fanta Orange (33cl),Soft Drink,2.50
+6004,Spa Reine Water (50cl),Soft Drink,2.20
+6005,Spa Sparkling Water (50cl),Soft Drink,2.20
+6006,Lipton Ice Tea (33cl),Soft Drink,2.70
+6007,Red Bull (25cl),Energy Drink,3.50
+6008,Heineken (33cl),Beer,3.00
+6009,Jupiler (33cl),Beer,2.80
+6010,Leffe Blonde (33cl),Beer,3.90
+6011,Leffe Brune (33cl),Beer,3.90
+6012,Hoegaarden White (33cl),Beer,3.50
+6013,House Red Wine (Glass),Wine,4.50
+6014,House White Wine (Glass),Wine,4.50
+6015,Prosecco (20cl),Wine,5.50
+6016,Orange Juice (25cl),Juice,2.80
+6017,Apple Juice (25cl),Juice,2.80
+6018,Still Mineral Water (1L),Soft Drink,4.00
+6019,Sparkling Mineral Water (1L),Soft Drink,4.00
+6020,Espresso,Coffee/Tea,2.20
+6021,Cappuccino,Coffee/Tea,2.90
+6022,Latte Macchiato,Coffee/Tea,3.20
+6023,Hot Tea (assorted),Coffee/Tea,2.50

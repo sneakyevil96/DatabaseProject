@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Mamma Mia Menu</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.75rem; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f6f6f6; }
+        .flags { color: #555; font-size: 0.9rem; }
+        .toggle { margin-top: 1rem; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>Mamma Mia Menu</h1>
+    <p>Dynamic prices computed from ingredient costs with 40% margin and 9% VAT.</p>
+
+    <div class="toggle">
+        {% if include_cost %}
+            <a href="{% url 'pizzeria:menu' %}">Hide ingredient costs</a>
+        {% else %}
+            <a href="{% url 'pizzeria:menu' %}?include_cost=1">Show ingredient costs</a>
+        {% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Pizza</th>
+                {% if include_cost %}<th>Ingredient Cost</th>{% endif %}
+                <th>Final Price</th>
+                <th>Flags</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pizza in pizzas %}
+                <tr>
+                    <td>
+                        <strong>{{ pizza.pizza.name }}</strong><br>
+                        <span class="flags">{{ pizza.pizza.description }}</span>
+                    </td>
+                    {% if include_cost %}
+                        <td>EUR {{ pizza.ingredient_cost|floatformat:2 }}</td>
+                    {% endif %}
+                    <td>EUR {{ pizza.final_price_with_vat|floatformat:2 }}</td>
+                    <td class="flags">
+                        {% if pizza.is_vegetarian_computed or pizza.is_vegan_computed %}
+                            {% if pizza.is_vegetarian_computed %}Vegetarian{% endif %}
+                            {% if pizza.is_vegetarian_computed and pizza.is_vegan_computed %}, {% endif %}
+                            {% if pizza.is_vegan_computed %}Vegan{% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="{% if include_cost %}4{% else %}3{% endif %}">No pizzas available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 style="margin-top: 3rem;">Drinks</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for drink in drinks %}
+                <tr>
+                    <td>{{ drink.name }}</td>
+                    <td>{{ drink.category }}</td>
+                    <td>EUR {{ drink.price_eur|floatformat:2 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No drinks available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 style="margin-top: 3rem;">Desserts</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Vegan</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dessert in desserts %}
+                <tr>
+                    <td>{{ dessert.name }}</td>
+                    <td>{{ dessert.description }}</td>
+                    <td>EUR {{ dessert.price_eur|floatformat:2 }}</td>
+                    <td>{% if dessert.is_vegan %}Yes{% else %}No{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No desserts available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

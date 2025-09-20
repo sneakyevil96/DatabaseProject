@@ -104,3 +104,24 @@ class PizzaPricingAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(models.Drink)
+class DrinkAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "price_eur", "is_active")
+    list_filter = ("category", "is_active")
+    search_fields = ("name", "category")
+
+
+@admin.register(models.Dessert)
+class DessertAdmin(admin.ModelAdmin):
+    list_display = ("name", "price_eur", "is_vegan", "is_active")
+    list_filter = ("is_vegan", "is_active")
+    search_fields = ("name", "description")
+
+
+@admin.register(models.DessertIngredient)
+class DessertIngredientAdmin(admin.ModelAdmin):
+    list_display = ("dessert", "ingredient")
+    search_fields = ("dessert__name", "ingredient")
+    autocomplete_fields = ("dessert",)

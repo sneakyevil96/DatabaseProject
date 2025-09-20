@@ -1,0 +1,26 @@
+customer_id,first_name,last_name,email,phone,street,city,postal_code,country,birthdate,gender
+1,Amélie,Dupont,amelie.dupont@example.com,+32 470 12 34 56,Avenue Louise 231,Ixelles,1050,Belgium,1999-04-18,female
+2,Louis,Verbeeck,louis.verbeeck@example.com,+32 486 22 18 90,Rue de la Loi 12,Bruxelles,1000,Belgium,1995-11-03,male
+3,Noah,De Smet,noah.desmet@example.com,+32 495 77 20 31,Chaussée de Gand 402,Molenbeek-Saint-Jean,1080,Belgium,2001-07-27,male
+4,Sara,Benali,sara.benali@example.com,+32 472 40 55 88,Rue Wayez 75,Anderlecht,1070,Belgium,1998-02-09,female
+5,Elena,Marin,elena.marin@example.com,+32 491 66 44 12,Rue du Bailli 19,Ixelles,1050,Belgium,2003-06-14,female
+6,Matteo,Rossi,matteo.rossi@example.com,+32 476 11 92 03,Avenue Charles Quint 145,Ganshoren,1083,Belgium,1997-09-21,male
+7,Yara,Azouzi,yara.azouzi@example.com,+32 488 05 63 47,Boulevard Brand Whitlock 102,Woluwe-Saint-Lambert,1200,Belgium,2000-12-01,female
+8,Arthur,Lambert,arthur.lambert@example.com,+32 474 88 30 72,Rue Royale 210,Bruxelles,1000,Belgium,1992-03-25,male
+9,Zoé,Moreau,zoe.moreau@example.com,+32 496 13 22 49,Rue de Brabant 154,Schaerbeek,1030,Belgium,2004-10-07,female
+10,Mehdi,El Khattabi,mehdi.elkhattabi@example.com,+32 478 59 90 66,Rue Léopold I 320,Laeken,1020,Belgium,1996-05-12,male
+11,Clara,Petit,clara.petit@example.com,+32 493 27 81 45,Avenue de Tervueren 389,Woluwe-Saint-Pierre,1150,Belgium,1993-08-30,female
+12,Hugo,Declercq,hugo.declercq@example.com,+32 482 74 53 61,Rue de Flandre 87,Bruxelles,1000,Belgium,1989-01-16,male
+13,Maya,Khan,maya.khan@example.com,+32 490 03 48 22,Avenue du Heysel 11,Laeken,1020,Belgium,2002-02-28,female
+14,Ines,Peeters,ines.peeters@example.com,+32 475 36 64 95,Rue des Palais 45,Schaerbeek,1030,Belgium,1994-06-05,female
+15,Lucas,Thys,lucas.thys@example.com,+32 489 41 07 84,Avenue de Jette 250,Jette,1090,Belgium,2001-11-19,male
+16,Sofia,Carvalho,sofia.carvalho@example.com,+32 497 92 01 58,Chaussée de Waterloo 962,Uccle,1180,Belgium,1990-04-03,female
+17,Jonas,De Wilde,jonas.dewilde@example.com,+32 471 10 60 74,Rue de Genève 6,Evere,1140,Belgium,1998-09-11,male
+18,Olivia,Schmidt,olivia.schmidt@example.com,+32 492 25 49 33,Avenue des Nerviens 28,Etterbeek,1040,Belgium,1997-12-22,female
+19,Samir,Hassan,samir.hassan@example.com,+32 498 66 77 88,Rue du Monténégro 52,Forest,1190,Belgium,1995-07-08,male
+20,Lena,Novak,lena.novak@example.com,+32 487 38 29 14,Boulevard Général Jacques 215,Ixelles,1050,Belgium,2000-01-29,female
+21,Victor,Nguyen,victor.nguyen@example.com,+32 479 14 82 50,Avenue Émile de Beco 4,Ixelles,1050,Belgium,1993-03-18,male
+22,Aisha,Omar,aisha.omar@example.com,+32 496 71 15 09,Rue Gray 132,Ixelles,1050,Belgium,2002-06-26,female
+23,Maxime,Renard,maxime.renard@example.com,+32 483 02 73 61,Avenue Winston Churchill 366,Uccle,1180,Belgium,1987-10-02,male
+24,Chiara,De Luca,chiara.deluca@example.com,+32 491 04 20 77,Avenue Brugmann 142,Forest,1190,Belgium,1999-05-15,female
+25,Eva,Barth,eva.barth@example.com,+32 470 55 66 44,Rue de la Cambre 9,Auderghem,1160,Belgium,1996-02-04,female

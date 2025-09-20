@@ -1,0 +1,14 @@
+pizza_id,pizza_name,description,is_vegetarian,is_vegan,is_active
+4001,Detroit Chicken Kebap,"Thick-base Detroit-style pizza topped with chicken kebab, onions, and garlic sauce",0,0,1
+4002,Gyros Pizza,"Classic gyros flavours with tzatziki, tomatoes, and onions",0,0,1
+4003,4 Formaggi,"Rich blend of mozzarella, gorgonzola, parmesan, and ricotta cheeses",1,0,1
+4004,Margherita,"Traditional pizza with tomato sauce, mozzarella, and fresh basil",1,0,1
+4005,Peperoni,"Spicy pepperoni with mozzarella on a tomato base",0,0,1
+4006,Meatlovers,"Loaded with pepperoni, bacon, sausage, and beef",0,0,1
+4007,Salami,"Classic salami and mozzarella combo",0,0,1
+4008,Tuna Treat,"Tuna with sweetcorn, onions, and olives",0,0,1
+4009,Carciofita,"Artichokes, mushrooms, and olives over mozzarella",1,0,1
+4010,Barbecue,"BBQ chicken with bacon, mozzarella, and onions",0,0,1
+4011,Supreme,"Packed with meats and vegetables for the ultimate slice",0,0,1
+4012,Sweet Chicken Curry,"Chicken in sweet curry sauce with pineapple and peppers",0,0,1
+4013,Hawaiian,"Ham-style bacon with pineapple over mozzarella",0,0,1
