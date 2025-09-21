@@ -37,6 +37,8 @@ class Command(BaseCommand):
         if not data_dir.exists():
             raise CommandError(f"Data directory {data_dir} does not exist")
 
+        self._ensure_discount_codes()
+
         with transaction.atomic():
             if options["purge"]:
                 self._purge_existing_data()
@@ -66,6 +68,10 @@ class Command(BaseCommand):
 
     def _purge_existing_data(self) -> None:
         tables = [
+            models.OrderDiscountApplication._meta.db_table,
+            models.CustomerDiscountRedemption._meta.db_table,
+            models.CustomerLoyalty._meta.db_table,
+            models.DeliveryZoneAssignment._meta.db_table,
             models.OrderItem._meta.db_table,
             models.CustomerOrder._meta.db_table,
             models.PizzaIngredient._meta.db_table,
@@ -80,6 +86,45 @@ class Command(BaseCommand):
         quoted_tables = ", ".join(connection.ops.quote_name(table) for table in tables)
         with connection.cursor() as cursor:
             cursor.execute(f"TRUNCATE TABLE {quoted_tables} RESTART IDENTITY CASCADE;")
+
+    def _ensure_discount_codes(self) -> None:
+        defaults = [
+            {
+                "code": "WELCOME10",
+                "description": "10% off the first order",
+                "discount_type": "percentage",
+                "discount_value": "10.0",
+                "valid_from": date(2025, 1, 1),
+                "valid_until": date(2025, 12, 31),
+                "is_one_time": True,
+                "usage_limit": 1,
+            },
+            {
+                "code": "FREEDRINK",
+                "description": "Free drink with any pizza",
+                "discount_type": "fixed_amount",
+                "discount_value": "3.00",
+                "valid_from": date(2025, 1, 1),
+                "valid_until": None,
+                "is_one_time": False,
+                "usage_limit": 100,
+            },
+        ]
+        for payload in defaults:
+            models.DiscountCode.objects.update_or_create(
+                code=payload["code"],
+                defaults={
+                    "description": payload["description"],
+                    "discount_type": payload["discount_type"],
+                    "discount_value": Decimal(payload["discount_value"]),
+                    "valid_from": payload["valid_from"],
+                    "valid_until": payload["valid_until"],
+                    "is_one_time": payload["is_one_time"],
+                    "usage_limit": payload["usage_limit"],
+                    "used_count": 0,
+                    "is_active": True,
+                },
+            )
 
     def _load_ingredients(self, path: Path) -> None:
         rows = self._read_csv(path)
@@ -174,7 +219,7 @@ class Command(BaseCommand):
     def _load_customers(self, path: Path) -> None:
         rows = self._read_csv(path)
         for row in rows:
-            models.Customer.objects.update_or_create(
+            customer, _ = models.Customer.objects.update_or_create(
                 id=int(row["customer_id"]),
                 defaults={
                     "first_name": row["first_name"].strip(),
@@ -189,22 +234,31 @@ class Command(BaseCommand):
                     "gender": row.get("gender", "").strip(),
                 },
             )
+            models.CustomerLoyalty.objects.get_or_create(customer=customer)
 
     def _load_delivery_people(self, path: Path) -> None:
         rows = self._read_csv(path)
+        models.DeliveryZoneAssignment.objects.all().delete()
         for row in rows:
             postal_codes = [code.strip() for code in row.get("assigned_postcodes", "").split("|") if code.strip()]
             primary_postal = postal_codes[0] if postal_codes else ""
-            models.DeliveryPerson.objects.update_or_create(
+            delivery_person, _ = models.DeliveryPerson.objects.update_or_create(
                 id=int(row["deliveryguy_id"]),
                 defaults={
                     "first_name": row["name"].strip(),
                     "last_name": row["surname"].strip(),
                     "phone": row.get("phone", "").strip(),
                     "postal_code": primary_postal,
+                    "next_available_at": None,
                     "is_active": True,
                 },
             )
+            for index, code in enumerate(postal_codes, start=1):
+                models.DeliveryZoneAssignment.objects.update_or_create(
+                    delivery_person=delivery_person,
+                    postal_code=code,
+                    defaults={"priority": index},
+                )
 
     def _read_csv(self, path: Path) -> Iterable[dict[str, str]]:
         if not path.exists():
@@ -231,6 +285,9 @@ class Command(BaseCommand):
         if not value:
             return date.today()
         return date.fromisoformat(value)
+
+
+
 
 
 

@@ -125,3 +125,31 @@ class DessertIngredientAdmin(admin.ModelAdmin):
     list_display = ("dessert", "ingredient")
     search_fields = ("dessert__name", "ingredient")
     autocomplete_fields = ("dessert",)
+
+
+@admin.register(models.CustomerLoyalty)
+class CustomerLoyaltyAdmin(admin.ModelAdmin):
+    list_display = ("customer", "lifetime_pizzas", "pizzas_since_last_reward", "updated_at")
+    search_fields = ("customer__first_name", "customer__last_name", "customer__email")
+
+
+@admin.register(models.CustomerDiscountRedemption)
+class CustomerDiscountRedemptionAdmin(admin.ModelAdmin):
+    list_display = ("customer", "discount_code", "redeemed_at")
+    search_fields = ("customer__first_name", "customer__last_name", "discount_code__code")
+    autocomplete_fields = ("customer", "discount_code")
+
+
+@admin.register(models.DeliveryZoneAssignment)
+class DeliveryZoneAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("delivery_person", "postal_code", "priority")
+    list_filter = ("postal_code",)
+    search_fields = ("delivery_person__first_name", "delivery_person__last_name", "postal_code")
+    autocomplete_fields = ("delivery_person",)
+
+
+@admin.register(models.OrderDiscountApplication)
+class OrderDiscountApplicationAdmin(admin.ModelAdmin):
+    list_display = ("order", "discount_code", "amount", "applied_at")
+    search_fields = ("order__id", "discount_code__code")
+    autocomplete_fields = ("order", "discount_code")

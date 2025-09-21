@@ -1,49 +1,36 @@
--- Week 2 Schema for Mamma Mia Pizza System
+-- Week 4 Schema for Mamma Mia Pizza System
 -- Run against PostgreSQL 15+ (tested with 17)
 
--- Clean up existing types/tables when re-running in dev
 DO $$
 BEGIN
     EXECUTE 'DROP VIEW IF EXISTS pizza_pricing CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS order_item CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS customer_order CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS pizza_ingredient CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS pizza CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS ingredient CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS customer CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS delivery_person CASCADE';
-    EXECUTE 'DROP TABLE IF EXISTS discount_code CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_orderdiscountapplication CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_customerdiscountredemption CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_customerloyalty CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_deliveryzoneassignment CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_orderitem CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_customerorder CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_drink CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_dessert CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_dessertingredient CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_pizzaingredient CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_pizza CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_ingredient CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_customer CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_deliveryperson CASCADE';
+    EXECUTE 'DROP TABLE IF EXISTS pizzeria_discountcode CASCADE';
     EXECUTE 'DROP TYPE IF EXISTS order_status';
     EXECUTE 'DROP TYPE IF EXISTS delivery_type';
     EXECUTE 'DROP TYPE IF EXISTS order_item_type';
     EXECUTE 'DROP TYPE IF EXISTS discount_type';
 END $$;
 
-CREATE TYPE order_status AS ENUM (
-    'pending',
-    'preparing',
-    'out_for_delivery',
-    'delivered',
-    'cancelled'
-);
+CREATE TYPE order_status AS ENUM ('pending', 'preparing', 'out_for_delivery', 'delivered', 'cancelled');
+CREATE TYPE delivery_type AS ENUM ('delivery', 'pickup');
+CREATE TYPE order_item_type AS ENUM ('pizza', 'drink', 'dessert');
+CREATE TYPE discount_type AS ENUM ('percentage', 'fixed_amount');
 
-CREATE TYPE delivery_type AS ENUM (
-    'delivery',
-    'pickup'
-);
-
-CREATE TYPE order_item_type AS ENUM (
-    'pizza',
-    'drink',
-    'dessert'
-);
-
-CREATE TYPE discount_type AS ENUM (
-    'percentage',
-    'fixed_amount'
-);
-
-CREATE TABLE ingredient (
+CREATE TABLE pizzeria_ingredient (
     ingredient_id       SERIAL PRIMARY KEY,
     name                VARCHAR(100) NOT NULL UNIQUE,
     is_meat             BOOLEAN NOT NULL DEFAULT FALSE,
@@ -55,7 +42,7 @@ CREATE TABLE ingredient (
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE pizza (
+CREATE TABLE pizzeria_pizza (
     pizza_id            SERIAL PRIMARY KEY,
     name                VARCHAR(100) NOT NULL UNIQUE,
     description         TEXT,
@@ -66,18 +53,18 @@ CREATE TABLE pizza (
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE pizza_ingredient (
-    pizza_ingredient_id SERIAL PRIMARY KEY,
-    pizza_id            INTEGER NOT NULL REFERENCES pizza(pizza_id) ON DELETE CASCADE,
-    ingredient_id       INTEGER NOT NULL REFERENCES ingredient(ingredient_id) ON DELETE RESTRICT,
+CREATE TABLE pizzeria_pizzaingredient (
+    id                  SERIAL PRIMARY KEY,
+    pizza_id            INTEGER NOT NULL REFERENCES pizzeria_pizza(pizza_id) ON DELETE CASCADE,
+    ingredient_id       INTEGER NOT NULL REFERENCES pizzeria_ingredient(ingredient_id) ON DELETE RESTRICT,
     quantity            NUMERIC(10,2) NOT NULL CHECK (quantity > 0),
     position            SMALLINT,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT pizza_ingredient_unique UNIQUE (pizza_id, ingredient_id)
+    CONSTRAINT pizzaingredient_unique UNIQUE (pizza_id, ingredient_id)
 );
 
-CREATE TABLE customer (
+CREATE TABLE pizzeria_customer (
     customer_id         SERIAL PRIMARY KEY,
     first_name          VARCHAR(50) NOT NULL,
     last_name           VARCHAR(50) NOT NULL,
@@ -93,19 +80,20 @@ CREATE TABLE customer (
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE delivery_person (
+CREATE TABLE pizzeria_deliveryperson (
     delivery_person_id  SERIAL PRIMARY KEY,
     first_name          VARCHAR(50) NOT NULL,
     last_name           VARCHAR(50) NOT NULL,
     phone               VARCHAR(30) NOT NULL UNIQUE,
     postal_code         VARCHAR(12) NOT NULL,
     last_delivery_completed_at TIMESTAMPTZ,
+    next_available_at   TIMESTAMPTZ,
     is_active           BOOLEAN NOT NULL DEFAULT TRUE,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE discount_code (
+CREATE TABLE pizzeria_discountcode (
     discount_code_id    SERIAL PRIMARY KEY,
     code                VARCHAR(40) NOT NULL UNIQUE,
     description         TEXT,
@@ -120,37 +108,107 @@ CREATE TABLE discount_code (
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE customer_order (
+CREATE TABLE pizzeria_drink (
+    id                  SERIAL PRIMARY KEY,
+    name                VARCHAR(100) NOT NULL UNIQUE,
+    category            VARCHAR(50) NOT NULL,
+    price_eur           NUMERIC(6,2) NOT NULL CHECK (price_eur >= 0),
+    is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE pizzeria_dessert (
+    id                  SERIAL PRIMARY KEY,
+    name                VARCHAR(100) NOT NULL UNIQUE,
+    description         TEXT,
+    price_eur           NUMERIC(6,2) NOT NULL CHECK (price_eur >= 0),
+    is_vegan            BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE pizzeria_dessertingredient (
+    id                  SERIAL PRIMARY KEY,
+    dessert_id          INTEGER NOT NULL REFERENCES pizzeria_dessert(id) ON DELETE CASCADE,
+    ingredient          VARCHAR(100) NOT NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT dessertingredient_unique UNIQUE (dessert_id, ingredient)
+);
+
+CREATE TABLE pizzeria_customerloyalty (
+    id                  SERIAL PRIMARY KEY,
+    customer_id         INTEGER NOT NULL UNIQUE REFERENCES pizzeria_customer(customer_id) ON DELETE CASCADE,
+    lifetime_pizzas     INTEGER NOT NULL DEFAULT 0,
+    pizzas_since_last_reward INTEGER NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE pizzeria_customerdiscountredemption (
+    id                  SERIAL PRIMARY KEY,
+    customer_id         INTEGER NOT NULL REFERENCES pizzeria_customer(customer_id) ON DELETE CASCADE,
+    discount_code_id    INTEGER NOT NULL REFERENCES pizzeria_discountcode(discount_code_id) ON DELETE CASCADE,
+    redeemed_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT customerdiscount_unique UNIQUE (customer_id, discount_code_id)
+);
+
+CREATE TABLE pizzeria_deliveryzoneassignment (
+    id                  SERIAL PRIMARY KEY,
+    delivery_person_id  INTEGER NOT NULL REFERENCES pizzeria_deliveryperson(delivery_person_id) ON DELETE CASCADE,
+    postal_code         VARCHAR(12) NOT NULL,
+    priority            INTEGER NOT NULL DEFAULT 1,
+    CONSTRAINT deliveryzone_unique UNIQUE (delivery_person_id, postal_code)
+);
+
+CREATE TABLE pizzeria_customerorder (
     order_id            SERIAL PRIMARY KEY,
-    customer_id         INTEGER NOT NULL REFERENCES customer(customer_id) ON DELETE CASCADE,
+    customer_id         INTEGER NOT NULL REFERENCES pizzeria_customer(customer_id) ON DELETE CASCADE,
     order_datetime      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     status              order_status NOT NULL DEFAULT 'pending',
     delivery_type       delivery_type NOT NULL DEFAULT 'delivery',
-    total_discount      NUMERIC(10,2) NOT NULL DEFAULT 0,
+    subtotal_amount     NUMERIC(10,2) NOT NULL DEFAULT 0,
+    discount_amount     NUMERIC(10,2) NOT NULL DEFAULT 0,
+    total_due           NUMERIC(10,2) NOT NULL DEFAULT 0,
+    loyalty_discount_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+    birthday_discount_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+    code_discount_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+    applied_discount_code_id INTEGER REFERENCES pizzeria_discountcode(discount_code_id) ON DELETE SET NULL,
     notes               TEXT,
-    delivery_person_id  INTEGER REFERENCES delivery_person(delivery_person_id) ON DELETE SET NULL,
+    delivery_person_id  INTEGER REFERENCES pizzeria_deliveryperson(delivery_person_id) ON DELETE SET NULL,
     driver_assigned_at  TIMESTAMPTZ,
     delivered_at        TIMESTAMPTZ,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE order_item (
+CREATE TABLE pizzeria_orderitem (
     order_item_id       SERIAL PRIMARY KEY,
-    order_id            INTEGER NOT NULL REFERENCES customer_order(order_id) ON DELETE CASCADE,
+    order_id            INTEGER NOT NULL REFERENCES pizzeria_customerorder(order_id) ON DELETE CASCADE,
     item_type           order_item_type NOT NULL,
-    pizza_id            INTEGER REFERENCES pizza(pizza_id) ON DELETE SET NULL,
+    pizza_id            INTEGER REFERENCES pizzeria_pizza(pizza_id) ON DELETE SET NULL,
+    drink_id            INTEGER REFERENCES pizzeria_drink(id) ON DELETE SET NULL,
+    dessert_id          INTEGER REFERENCES pizzeria_dessert(id) ON DELETE SET NULL,
     item_name_snapshot  VARCHAR(120) NOT NULL,
     quantity            INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+    base_price          NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (base_price >= 0),
     unit_price_at_order NUMERIC(10,2) NOT NULL CHECK (unit_price_at_order >= 0),
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT order_item_requires_pizza
-        CHECK (
-            (item_type = 'pizza' AND pizza_id IS NOT NULL)
-            OR (item_type <> 'pizza' AND pizza_id IS NULL)
-        )
+    CONSTRAINT orderitem_product_presence CHECK (
+        (item_type = 'pizza' AND pizza_id IS NOT NULL AND drink_id IS NULL AND dessert_id IS NULL)
+        OR (item_type = 'drink' AND drink_id IS NOT NULL AND pizza_id IS NULL AND dessert_id IS NULL)
+        OR (item_type = 'dessert' AND dessert_id IS NOT NULL AND pizza_id IS NULL AND drink_id IS NULL)
+    )
 );
 
--- Derived view: calculates dynamic pricing per pizza
+CREATE TABLE pizzeria_orderdiscountapplication (
+    id                  SERIAL PRIMARY KEY,
+    order_id            INTEGER NOT NULL REFERENCES pizzeria_customerorder(order_id) ON DELETE CASCADE,
+    discount_code_id    INTEGER NOT NULL REFERENCES pizzeria_discountcode(discount_code_id) ON DELETE CASCADE,
+    amount              NUMERIC(10,2) NOT NULL,
+    applied_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE OR REPLACE VIEW pizza_pricing AS
 SELECT
     p.pizza_id,
@@ -161,9 +219,7 @@ SELECT
     ROUND(SUM(pi.quantity * i.unit_cost) * 1.40 * 1.09, 2) AS final_price_with_vat,
     BOOL_AND(NOT i.is_meat) AS is_vegetarian_computed,
     BOOL_AND(NOT i.is_meat AND NOT i.is_dairy) AS is_vegan_computed
-FROM pizza p
-JOIN pizza_ingredient pi ON pi.pizza_id = p.pizza_id
-JOIN ingredient i ON i.ingredient_id = pi.ingredient_id
+FROM pizzeria_pizza p
+JOIN pizzeria_pizzaingredient pi ON pi.pizza_id = p.pizza_id
+JOIN pizzeria_ingredient i ON i.ingredient_id = pi.ingredient_id
 GROUP BY p.pizza_id, p.description, p.is_active;
-
-
