@@ -31,18 +31,34 @@ class PizzaAdmin(admin.ModelAdmin):
     inlines = [PizzaIngredientInline]
 
 
+@admin.register(models.PostalArea)
+class PostalAreaAdmin(admin.ModelAdmin):
+    list_display = ("postal_code", "city", "country")
+    search_fields = ("postal_code", "city")
+    list_filter = ("country",)
+
+
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ("first_name", "last_name", "email", "phone", "postal_code")
-    search_fields = ("first_name", "last_name", "email", "phone")
-    list_filter = ("city", "postal_code", "gender")
+    search_fields = (
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "postal_area__postal_code",
+        "postal_area__city",
+    )
+    list_filter = ("postal_area", "gender")
+    list_select_related = ("postal_area",)
 
 
 @admin.register(models.DeliveryPerson)
 class DeliveryPersonAdmin(admin.ModelAdmin):
     list_display = ("first_name", "last_name", "phone", "postal_code", "is_active")
-    list_filter = ("is_active", "postal_code")
-    search_fields = ("first_name", "last_name", "phone")
+    list_filter = ("is_active", "postal_area")
+    search_fields = ("first_name", "last_name", "phone", "postal_area__postal_code")
+    list_select_related = ("postal_area",)
 
 
 @admin.register(models.DiscountCode)
@@ -55,7 +71,14 @@ class DiscountCodeAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = models.OrderItem
     extra = 0
-    autocomplete_fields = ("pizza",)
+    fields = (
+        "content_type",
+        "object_id",
+        "item_name_snapshot",
+        "quantity",
+        "base_price",
+        "unit_price_at_order",
+    )
     readonly_fields = ("item_name_snapshot", "unit_price_at_order")
 
 
@@ -71,10 +94,24 @@ class CustomerOrderAdmin(admin.ModelAdmin):
 
 @admin.register(models.OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ("order", "item_name_snapshot", "item_type", "quantity", "unit_price_at_order")
-    list_filter = ("item_type",)
-    autocomplete_fields = ("order", "pizza")
+    list_display = ("order", "item_name_snapshot", "product_type", "quantity", "unit_price_at_order")
+    list_filter = ("content_type",)
+    autocomplete_fields = ("order",)
     search_fields = ("item_name_snapshot", "order__id")
+    list_select_related = ("order", "content_type")
+
+    def product_type(self, obj):
+        return obj.content_type.model if obj.content_type_id else ""
+
+    product_type.short_description = "Product type"
+
+
+@admin.register(models.OrderAdjustment)
+class OrderAdjustmentAdmin(admin.ModelAdmin):
+    list_display = ("order", "adjustment_type", "amount", "created_at")
+    list_filter = ("adjustment_type",)
+    autocomplete_fields = ("order",)
+    search_fields = ("order__id",)
 
 
 @admin.register(models.PizzaPricing)
@@ -142,10 +179,21 @@ class CustomerDiscountRedemptionAdmin(admin.ModelAdmin):
 
 @admin.register(models.DeliveryZoneAssignment)
 class DeliveryZoneAssignmentAdmin(admin.ModelAdmin):
-    list_display = ("delivery_person", "postal_code", "priority")
-    list_filter = ("postal_code",)
-    search_fields = ("delivery_person__first_name", "delivery_person__last_name", "postal_code")
-    autocomplete_fields = ("delivery_person",)
+    list_display = ("delivery_person", "postal_area", "postal_code_display", "priority")
+    list_filter = ("postal_area",)
+    search_fields = (
+        "delivery_person__first_name",
+        "delivery_person__last_name",
+        "postal_area__postal_code",
+        "postal_area__city",
+    )
+    autocomplete_fields = ("delivery_person", "postal_area")
+    list_select_related = ("delivery_person", "postal_area")
+
+    def postal_code_display(self, obj):
+        return obj.postal_area.postal_code
+
+    postal_code_display.short_description = "Postal code"
 
 
 @admin.register(models.OrderDiscountApplication)

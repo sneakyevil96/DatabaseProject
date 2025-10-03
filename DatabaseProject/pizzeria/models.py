@@ -1,3 +1,7 @@
+from decimal import Decimal
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.functions import Now
 from django.utils import timezone
@@ -16,10 +20,9 @@ class DeliveryType(models.TextChoices):
     PICKUP = "pickup", "Pickup"
 
 
-class OrderItemType(models.TextChoices):
-    PIZZA = "pizza", "Pizza"
-    DRINK = "drink", "Drink"
-    DESSERT = "dessert", "Dessert"
+class OrderAdjustmentType(models.TextChoices):
+    LOYALTY = "loyalty", "Loyalty discount"
+    BIRTHDAY = "birthday", "Birthday discount"
 
 
 class DiscountType(models.TextChoices):
@@ -94,6 +97,20 @@ class PizzaIngredient(models.Model):
         return f"{self.pizza} -> {self.ingredient} ({self.quantity})"
 
 
+class PostalArea(models.Model):
+    postal_code = models.CharField(max_length=12, unique=True)
+    city = models.CharField(max_length=80, blank=True)
+    country = models.CharField(max_length=80, default="Belgium")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["postal_code"]
+
+    def __str__(self) -> str:
+        return f"{self.postal_code} {self.city}"
+
+
 class Customer(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -101,9 +118,11 @@ class Customer(models.Model):
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=30)
     street = models.CharField(max_length=150)
-    city = models.CharField(max_length=80)
-    postal_code = models.CharField(max_length=12)
-    country = models.CharField(max_length=80, default="Belgium")
+    postal_area = models.ForeignKey(
+        PostalArea,
+        on_delete=models.PROTECT,
+        related_name="customers",
+    )
     gender = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -120,12 +139,28 @@ class Customer(models.Model):
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
 
+    @property
+    def city(self) -> str:
+        return self.postal_area.city
+
+    @property
+    def postal_code(self) -> str:
+        return self.postal_area.postal_code
+
+    @property
+    def country(self) -> str:
+        return self.postal_area.country
+
 
 class DeliveryPerson(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     phone = models.CharField(max_length=30, unique=True)
-    postal_code = models.CharField(max_length=12)
+    postal_area = models.ForeignKey(
+        PostalArea,
+        on_delete=models.PROTECT,
+        related_name="delivery_people",
+    )
     last_delivery_completed_at = models.DateTimeField(null=True, blank=True)
     next_available_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -137,6 +172,10 @@ class DeliveryPerson(models.Model):
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def postal_code(self) -> str:
+        return self.postal_area.postal_code
 
 
 class DiscountCode(models.Model):
@@ -190,19 +229,7 @@ class CustomerOrder(models.Model):
         choices=DeliveryType.choices,
         default=DeliveryType.DELIVERY,
     )
-    subtotal_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_due = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    loyalty_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    birthday_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    code_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    applied_discount_code = models.ForeignKey(
-        DiscountCode,
-        on_delete=models.SET_NULL,
-        related_name="orders",
-        null=True,
-        blank=True,
-    )
     notes = models.TextField(blank=True)
     delivery_person = models.ForeignKey(
         DeliveryPerson,
@@ -220,6 +247,61 @@ class CustomerOrder(models.Model):
 
     def __str__(self) -> str:
         return f"Order #{self.pk}"
+
+    def _adjustment_amount(self, adjustment_type: str) -> Decimal:
+        adjustment = self.adjustments.filter(adjustment_type=adjustment_type).first()
+        return adjustment.amount if adjustment else Decimal("0")
+
+    @property
+    def subtotal_amount(self) -> Decimal:
+        total = Decimal("0")
+        for item in self.items.all():
+            total += item.unit_price_at_order * item.quantity
+        return total
+
+    @property
+    def loyalty_discount_amount(self) -> Decimal:
+        return self._adjustment_amount(OrderAdjustmentType.LOYALTY)
+
+    @property
+    def birthday_discount_amount(self) -> Decimal:
+        return self._adjustment_amount(OrderAdjustmentType.BIRTHDAY)
+
+    @property
+    def code_discount_amount(self) -> Decimal:
+        return sum(
+            (application.amount for application in self.discount_applications.all()),
+            Decimal("0"),
+        )
+
+    @property
+    def discount_amount(self) -> Decimal:
+        automatic = sum((adjustment.amount for adjustment in self.adjustments.all()), Decimal("0"))
+        return automatic + self.code_discount_amount
+
+
+class OrderAdjustment(models.Model):
+    order = models.ForeignKey(
+        CustomerOrder,
+        on_delete=models.CASCADE,
+        related_name="adjustments",
+    )
+    adjustment_type = models.CharField(max_length=20, choices=OrderAdjustmentType.choices)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("order", "adjustment_type")
+        ordering = ["order", "adjustment_type"]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(amount__gt=0),
+                name="order_adjustment_amount_gt_0",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.order_id} -> {self.get_adjustment_type_display()} ({self.amount})"
 
 
 class Drink(models.Model):
@@ -259,28 +341,13 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE,
         related_name="items",
     )
-    item_type = models.CharField(max_length=20, choices=OrderItemType.choices)
-    pizza = models.ForeignKey(
-        Pizza,
-        on_delete=models.SET_NULL,
-        related_name="order_items",
-        null=True,
-        blank=True,
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.PROTECT,
+        limit_choices_to=models.Q(app_label="pizzeria", model__in=["pizza", "drink", "dessert"]),
     )
-    drink = models.ForeignKey(
-        Drink,
-        on_delete=models.SET_NULL,
-        related_name="order_items",
-        null=True,
-        blank=True,
-    )
-    dessert = models.ForeignKey(
-        Dessert,
-        on_delete=models.SET_NULL,
-        related_name="order_items",
-        null=True,
-        blank=True,
-    )
+    object_id = models.PositiveIntegerField()
+    product = GenericForeignKey("content_type", "object_id")
     item_name_snapshot = models.CharField(max_length=120)
     quantity = models.PositiveIntegerField(default=1)
     base_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -301,13 +368,9 @@ class OrderItem(models.Model):
                 check=models.Q(unit_price_at_order__gte=0),
                 name="order_item_unit_price_gte_0",
             ),
-            models.CheckConstraint(
-                check=(
-                    models.Q(item_type=OrderItemType.PIZZA, pizza__isnull=False, drink__isnull=True, dessert__isnull=True)
-                    | models.Q(item_type=OrderItemType.DRINK, drink__isnull=False, pizza__isnull=True, dessert__isnull=True)
-                    | models.Q(item_type=OrderItemType.DESSERT, dessert__isnull=False, pizza__isnull=True, drink__isnull=True)
-                ),
-                name="order_item_product_presence",
+            models.UniqueConstraint(
+                fields=["order", "content_type", "object_id"],
+                name="order_item_unique_product",
             ),
         ]
 
@@ -374,15 +437,15 @@ class CustomerDiscountRedemption(models.Model):
 
 class DeliveryZoneAssignment(models.Model):
     delivery_person = models.ForeignKey(DeliveryPerson, related_name='zone_assignments', on_delete=models.CASCADE)
-    postal_code = models.CharField(max_length=12)
+    postal_area = models.ForeignKey(PostalArea, related_name='zone_assignments', on_delete=models.CASCADE)
     priority = models.PositiveIntegerField(default=1)
 
     class Meta:
-        unique_together = ("delivery_person", "postal_code")
-        ordering = ["delivery_person", "priority", "postal_code"]
+        unique_together = ("delivery_person", "postal_area")
+        ordering = ["delivery_person", "priority", "postal_area__postal_code"]
 
     def __str__(self) -> str:
-        return f"{self.delivery_person} -> {self.postal_code}"
+        return f"{self.delivery_person} -> {self.postal_area.postal_code}"
 
 
 class OrderDiscountApplication(models.Model):
